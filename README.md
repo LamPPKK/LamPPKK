@@ -1,5 +1,3 @@
-<img src="https://avatars.githubusercontent.com/u/50864894?v=4" width="96" alt="Nguyễn Đức Tùng Lâm" />
-
 ## Hi there 👋 I'm Lâm
 
 I'm **Nguyễn Đức Tùng Lâm**, a developer from Hanoi, Vietnam. I enjoy building open-source software across browsers, operating-system integration, web infrastructure, and cross-platform apps.
