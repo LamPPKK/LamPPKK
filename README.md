@@ -29,7 +29,6 @@ I'm currently focused on the **Fireball** browser family, Linux/Windows interope
 
 ### 🌐 Find me online
 
-- Website: [lamndt.id.vn](https://lamndt.id.vn)
 - GitHub: [@LamPPKK](https://github.com/LamPPKK)
 - X: [@LamPPKK](https://x.com/LamPPKK)
 
