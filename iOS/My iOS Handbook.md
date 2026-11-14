@@ -1,82 +1,85 @@
+![My iOS Handbook Banner](./images/handbook-banner.jpg)
+
 # My iOS Handbook
 
-> Bộ tài liệu tổng hợp, chuẩn hóa và mở rộng từ 9 file ôn tập & đề thi thực hành phỏng vấn iOS (`Audit questions`, `CDG_iOS_Questions`, `Interview Question`, `Interview`, `Interview2`, `Swift`, `Swift(1)`, `eyeOS Question`, `iOS`), được chia thành 9 chuyên đề nhỏ để dễ học, tra cứu và ôn tập.
+> A comprehensive, standardized iOS interview preparation handbook covering Swift, UIKit, Memory Management, Persistence, Concurrency, Software Architecture, Reactive Programming, Debugging, Unit Testing, and Live Coding / Algorithm Exercises — curated and corrected from real iOS technical interview notes and assessments.
 
----
+![Divider](./images/divider.png)
 
-## Danh sách chuyên đề
+## Table of Contents
 
-### Phần I: Kiến thức lý thuyết phỏng vấn iOS
+### Part I: iOS & Swift Interview Theory
 
-- **[1. Lập trình Hướng đối tượng (OOP) & Nguyên lý SOLID](./01-OOP-va-SOLID.md)**
-  - 1.1. Các khái niệm nền tảng
-  - 1.2. Tại sao dùng OOP & 4 tính chất của Lập trình Hướng đối tượng
-  - 1.3. Overriding vs Overloading
-  - 1.4. 5 Nguyên lý SOLID (OOD - Object-Oriented Design)
-- **[2. Kiến thức cốt lõi về ngôn ngữ Swift (Swift Core)](./02-Swift-Core.md)**
-  - 2.1. Tổng quan về Swift & Optional
-  - 2.2. Struct vs Class (Value Type vs Reference Type)
-  - 2.3. Khởi tạo (Initialization) chuyên sâu
+- **[1. Object-Oriented Programming (OOP) & SOLID Principles](./01-OOP-and-SOLID.md)**
+  - 1.1. Core Programming Concepts
+  - 1.2. Why OOP & The Four Pillars of OOP
+  - 1.3. Overriding vs. Overloading
+  - 1.4. The Five SOLID Principles (OOD)
+- **[2. Swift Core Concepts](./02-Swift-Core.md)**
+  - 2.1. Swift Overview & Optionals
+  - 2.2. Struct vs. Class (Value Type vs. Reference Type)
+  - 2.3. Deep Dive into Initialization
   - 2.4. Properties, Subscripts, KeyPaths & Property Wrappers
-  - 2.5. Function, Closure & Higher-Order Functions
-  - 2.6. Protocol, Tuple & Generics
-  - 2.7. Access Control (5 mức truy cập từ rộng nhất đến hẹp nhất)
-- **[3. Quản lý bộ nhớ (ARC & Memory Management)](./03-ARC-va-Memory-Management.md)**
-  - 3.1. ARC là gì? So sánh ARC và Non-ARC (MRC)
-  - 3.2. Strong, Weak & Unowned
-  - 3.3. Retain Cycle (Strong Reference Cycle) & Cách phòng tránh
-- **[4. Kiến thức iOS SDK & UIKit cơ bản & nâng cao](./04-iOS-SDK-va-UIKit.md)**
+  - 2.5. Functions, Closures & Higher-Order Functions
+  - 2.6. Protocols, Tuples & Generics
+  - 2.7. Access Control Levels
+- **[3. Memory Management (ARC & Retain Cycles)](./03-ARC-and-Memory-Management.md)**
+  - 3.1. What is ARC? ARC vs. Non-ARC (MRC)
+  - 3.2. Strong, Weak & Unowned References
+  - 3.3. Retain Cycles (Strong Reference Cycles) & Prevention
+- **[4. iOS SDK & UIKit (Fundamentals & Advanced)](./04-iOS-SDK-and-UIKit.md)**
   - 4.1. Application Lifecycle, AppDelegate & SceneDelegate
   - 4.2. ViewController Lifecycle
-  - 4.3. Truyền dữ liệu (Passing Data) & Điều hướng (Navigation)
-  - 4.4. Giao diện: View, Frame vs Bounds, Auto Layout, UIStackView, Custom View
-  - 4.5. UITableView & UICollectionView (Cơ bản & Nâng cao)
+  - 4.3. Passing Data & Navigation
+  - 4.4. Views, Frame vs. Bounds, Auto Layout, UIStackView & Custom Views
+  - 4.5. UITableView & UICollectionView (Basics & Advanced)
   - 4.6. Animation & Core Graphics
-- **[5. Lưu trữ dữ liệu (Persistence) & Hệ thống File iOS](./05-Persistence-va-File-System.md)**
-  - 5.1. Cấu trúc thư mục Sandbox của ứng dụng iOS
-  - 5.2. CRUD & Các lựa chọn Lưu trữ Dữ liệu (DBMS) trên iOS
-  - 5.3. Core Data
+- **[5. Data Persistence & iOS File System](./05-Persistence-and-File-System.md)**
+  - 5.1. iOS App Sandbox Directory Structure
+  - 5.2. CRUD & Storage Options (DBMS) on iOS
+  - 5.3. Core Data Stack & SQL Comparison
   - 5.4. Realm Database
-- **[6. Đa luồng & Bất đồng bộ (Concurrency: GCD, Operation, Swift Concurrency)](./06-Concurrency-GCD-Operation-AsyncAwait.md)**
-  - 6.1. Các khái niệm nền tảng
+- **[6. Concurrency & Multithreading (GCD, OperationQueue, Swift Concurrency)](./06-Concurrency-GCD-Operation-AsyncAwait.md)**
+  - 6.1. Fundamental Concurrency Concepts
   - 6.2. Grand Central Dispatch (GCD)
   - 6.3. Operation & OperationQueue
-  - 6.4. Swift Concurrency hiện đại (`async/await`, `Task`, `TaskGroup`, `Actor`)
-- **[7. Kiến trúc phần mềm (Architecture) & Design Patterns](./07-Architecture-va-Design-Patterns.md)**
-  - 7.1. Design Patterns (Mẫu thiết kế)
-  - 7.2. Các Architecture Patterns phổ biến trong iOS
-- **[8. Networking, Bảo mật, Reactive (RxSwift), Debug, Unit Test & Công cụ](./08-Networking-RxSwift-Debug-UnitTest.md)**
-  - 8.1. Networking, Parse JSON (`Codable`) & Quản lý Token
-  - 8.2. Reactive Programming với RxSwift
-  - 8.3. Push Notifications, Maps & Git
-  - 8.4. Debugging & Unit Testing trên Xcode
+  - 6.4. Modern Swift Concurrency (`async/await`, `Task`, `TaskGroup`, `Actor`)
+- **[7. Software Architecture & Design Patterns](./07-Architecture-and-Design-Patterns.md)**
+  - 7.1. Design Patterns Overview (Singleton, Delegation, Observer)
+  - 7.2. iOS Architecture Patterns (MVC, MVP, MVVM, VIPER & Clean Swift)
+- **[8. Networking, Security, RxSwift, Debugging & Unit Testing](./08-Networking-RxSwift-Debug-UnitTest.md)**
+  - 8.1. Networking, JSON Parsing (`Codable`) & Token Security
+  - 8.2. Reactive Programming with RxSwift
+  - 8.3. Push Notifications, Maps & Git (`merge` vs. `rebase`)
+  - 8.4. Debugging & Unit Testing in Xcode
 
-### Phần II: Bài tập thực hành & Live Coding
+### Part II: Practical Exercises, Live Coding & Algorithms
 
-- **[9. Bài Tập Thực Hành & Live Coding Phỏng Vấn iOS](./09-Bai-Tap-Thuc-Hanh-va-Thuat-Toan.md)**
-  - Bài tập 1: Bài toán "CDG Zig" (Biến thể FizzBuzz)
-  - Bài tập 2: Tìm chuỗi xuất hiện nhiều nhất trong mảng (Most Frequent String)
-  - Bài tập 3: Tìm cặp chuỗi xuất hiện nhiều nhất (Most Common Pair)
-  - Bài tập 4: Tính số Fibonacci thứ n
-  - Bài tập 5: Kiểm tra tổ hợp phím `SpecialActions.matchKeyCombo`
-  - Bài tập 6: Thiết kế hệ thống Ấp trứng Rồng (`Reptile` / `FireDragon` / `ReptileEgg`)
-  - Bài tập 7: Tìm và sửa lỗi Memory Leak (Retain Cycle) giữa Class A và Class B
-  - Bài tập 8: Đọc hiểu Code — Value Type & Copy-on-Write trên Array
-  - Bài tập 9: Đọc hiểu Code — Higher-Order Functions (`sorted` + `map`) trên Array Tuple & Dictionary
-  - Bài tập 10: Tư duy Toán tử & Biểu thức Logic
-  - Bài tập 11: Các bài toán Thuật toán kinh điển trong phỏng vấn iOS
+- **[9. Practical Exercises, Live Coding & Algorithms](./09-Practical-Exercises-and-Algorithms.md)**
+  - Exercise 1: "CDG Zig" (FizzBuzz Variant)
+  - Exercise 2: Most Frequent String in an Array
+  - Exercise 3: Most Common Pair of Strings
+  - Exercise 4: N-th Fibonacci Number
+  - Exercise 5: Key Combo Matching (`SpecialActions.matchKeyCombo`)
+  - Exercise 6: Reptile Egg Hatching System (`Reptile` / `FireDragon` / `ReptileEgg`)
+  - Exercise 7: Identify & Fix Retain Cycle (Memory Leak) Between Class A and Class B
+  - Exercise 8: Code Reading — Value Types & Copy-on-Write in Swift `Array`
+  - Exercise 9: Code Reading — Higher-Order Functions (`sorted` + `map`) on Array of Tuples & Dictionary
+  - Exercise 10: Operator Precedence & Short-Circuit Boolean Logic
+  - Exercise 11: Classic Algorithms in iOS Interviews (Sorting, Binary Search, Boyer-Moore Majority Vote, Substring Search, Shortest Path)
 
 ---
 
-## Ghi chú cấu trúc thư mục
+## Directory Structure
 
-- [My iOS Handbook.md](./My%20iOS%20Handbook.md) — Trang mục lục điều hướng trung tâm.
-- [01-OOP-va-SOLID.md](./01-OOP-va-SOLID.md) — 1. Lập trình Hướng đối tượng (OOP) & Nguyên lý SOLID.
-- [02-Swift-Core.md](./02-Swift-Core.md) — 2. Kiến thức cốt lõi về ngôn ngữ Swift (Swift Core).
-- [03-ARC-va-Memory-Management.md](./03-ARC-va-Memory-Management.md) — 3. Quản lý bộ nhớ (ARC & Memory Management).
-- [04-iOS-SDK-va-UIKit.md](./04-iOS-SDK-va-UIKit.md) — 4. Kiến thức iOS SDK & UIKit cơ bản & nâng cao.
-- [05-Persistence-va-File-System.md](./05-Persistence-va-File-System.md) — 5. Lưu trữ dữ liệu (Persistence) & Hệ thống File iOS.
-- [06-Concurrency-GCD-Operation-AsyncAwait.md](./06-Concurrency-GCD-Operation-AsyncAwait.md) — 6. Đa luồng & Bất đồng bộ (Concurrency: GCD, Operation, Swift Concurrency).
-- [07-Architecture-va-Design-Patterns.md](./07-Architecture-va-Design-Patterns.md) — 7. Kiến trúc phần mềm (Architecture) & Design Patterns.
-- [08-Networking-RxSwift-Debug-UnitTest.md](./08-Networking-RxSwift-Debug-UnitTest.md) — 8. Networking, Bảo mật, Reactive (RxSwift), Debug, Unit Test & Công cụ.
-- [09-Bai-Tap-Thuc-Hanh-va-Thuat-Toan.md](./09-Bai-Tap-Thuc-Hanh-va-Thuat-Toan.md) — 9. Bài Tập Thực Hành & Live Coding Phỏng Vấn iOS.
+- [My iOS Handbook.md](./My%20iOS%20Handbook.md) — Central Table of Contents.
+- [01-OOP-and-SOLID.md](./01-OOP-and-SOLID.md) — Object-Oriented Programming & SOLID Principles.
+- [02-Swift-Core.md](./02-Swift-Core.md) — Swift Language Core Concepts.
+- [03-ARC-and-Memory-Management.md](./03-ARC-and-Memory-Management.md) — ARC, `weak`, `unowned`, and Retain Cycles.
+- [04-iOS-SDK-and-UIKit.md](./04-iOS-SDK-and-UIKit.md) — Lifecycles, UIKit, Auto Layout, TableView/CollectionView & Animation.
+- [05-Persistence-and-File-System.md](./05-Persistence-and-File-System.md) — Sandbox, Core Data, SQLite & Realm.
+- [06-Concurrency-GCD-Operation-AsyncAwait.md](./06-Concurrency-GCD-Operation-AsyncAwait.md) — GCD, `OperationQueue` & Swift Concurrency.
+- [07-Architecture-and-Design-Patterns.md](./07-Architecture-and-Design-Patterns.md) — Design Patterns & iOS App Architectures.
+- [08-Networking-RxSwift-Debug-UnitTest.md](./08-Networking-RxSwift-Debug-UnitTest.md) — Networking, Security, RxSwift, Debugging & Testing.
+- [09-Practical-Exercises-and-Algorithms.md](./09-Practical-Exercises-and-Algorithms.md) — Coding Challenges, Debugging Puzzles & Classic Algorithms.
+- [images/](./images/) — Diagrams and screenshots extracted from original interview sheets.

@@ -1,82 +1,81 @@
-[← Mục lục My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Bài trước: 5. Lưu trữ dữ liệu (Persistence) & Hệ thống File iOS](./05-Persistence-va-File-System.md) | [Bài tiếp: 7. Kiến trúc phần mềm (Architecture) & Design Patterns ›](./07-Architecture-va-Design-Patterns.md)
+[← Back to My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Previous: 5. Data Persistence & iOS File System](./05-Persistence-and-File-System.md) | [Next: 7. Software Architecture & Design Patterns ›](./07-Architecture-and-Design-Patterns.md)
 
 ---
 
-# 6. Đa luồng & Bất đồng bộ (Concurrency: GCD, Operation, Swift Concurrency)
+# 6. Concurrency & Multithreading (GCD, OperationQueue, Swift Concurrency)
 
-## 6.1. Các khái niệm nền tảng
-- **Process (Tiến trình):** Một chương trình đang chạy (ví dụ cả ứng dụng iOS), sở hữu không gian bộ nhớ riêng. Một Process có 1 hoặc nhiều Thread.
-- **Thread (Luồng thực thi):** Đơn vị nhỏ nhất của CPU thực thi các chỉ thị (task). Các thread trong cùng một app dùng chung vùng nhớ Heap nhưng có Stack riêng.
-- **Task:** Một khối công việc/đoạn mã cần được thực thi.
-- **Main Thread:** Luồng chính của ứng dụng, nơi xử lý sự kiện người dùng và **cập nhật giao diện (UIKit / SwiftUI)**. **Quy tắc sống còn:** Mọi thao tác cập nhật UI **bắt buộc phải chạy trên Main Thread**; nếu chạy tác vụ nặng (tải mạng, decode ảnh lớn) trên Main Thread sẽ làm đơ/treo giao diện (UI freeze) và thậm chí bị Watchdog kill app.
-- **Concurrency (Đồng thời) vs Parallelism (Song song):**
-  - **Concurrency:** Nhiều tác vụ có thể bắt đầu, chạy xen kẽ (context switching trên 1 hoặc nhiều nhân CPU) và hoàn thành trong những khoảng thời gian gối đầu lên nhau.
-  - **Parallelism:** Nhiều tác vụ thực sự chạy **cùng một thời điểm** trên nhiều nhân (cores) CPU khác nhau.
-- **Synchronous (`sync`) vs Asynchronous (`async`):**
-  - **`sync` (Đồng bộ):** **Khóa (block) luồng hiện tại** đang gọi nó cho đến khi task bên trong chạy xong hoàn toàn mới trả quyền điều khiển để chạy dòng code tiếp theo.
-  - **`async` (Bất đồng bộ):** **Trả quyền điều khiển ngay lập tức** cho luồng hiện tại mà không cần đợi task hoàn thành -> không làm block luồng gọi.
-- **Phân biệt `Thread` vs `DispatchQueue`:**
-  - `Thread` là công cụ đa luồng ở cấp hệ điều hành (chi phí tạo và quản lý context switching cao nếu tự quản lý thủ công).
-  - `DispatchQueue` là lớp trừu tượng cấp cao của GCD hoạt động theo cơ chế **FIFO** và **thread-safe**; lập trình viên chỉ cần đưa task vào Queue, GCD sẽ tự động quản lý một pool các Thread ở tầng dưới để thực thi tối ưu.
+## 6.1. Fundamental Concurrency Concepts
+- **Process:** A running program instance (e.g., your iOS app) with its own virtual address space. A process contains one or more threads.
+- **Thread:** The smallest unit of execution scheduled by the OS. Threads within the same process share Heap memory but maintain separate Stacks.
+- **Task:** A discrete unit of work / block of code to execute.
+- **Main Thread:** The primary UI thread handling user events and **UIKit / SwiftUI updates**. **Golden Rule:** All UI updates **must** run on the Main Thread; running heavy work (network I/O, large image decoding) on it freezes the UI and risks Watchdog termination.
+- **Concurrency vs. Parallelism:**
+  - **Concurrency:** Managing and executing multiple tasks with overlapping lifetimes (via time-slicing/context switching on one or more cores).
+  - **Parallelism:** Literally executing multiple tasks simultaneously at the exact same instant across multiple CPU cores.
+- **Synchronous (`sync`) vs. Asynchronous (`async`):**
+  - **`sync`:** **Blocks the calling thread** until the dispatched task finishes before returning control.
+  - **`async`:** **Returns control immediately** to the calling thread without waiting for the task to complete.
+- **`Thread` vs. `DispatchQueue`:**
+  - `Thread` is an OS-level concurrency primitive (expensive to create and manage manually).
+  - `DispatchQueue` is GCD's higher-level, thread-safe **FIFO** queue abstraction—you submit tasks to a queue, and GCD automatically manages the underlying thread pool.
 
 ## 6.2. Grand Central Dispatch (GCD)
-GCD là thư viện C cấp thấp của Apple giúp quản lý thực thi đồng thời thông qua các **Dispatch Queue (FIFO)**.
+GCD is Apple's low-level C API for managing concurrent operations via **FIFO Dispatch Queues**.
 
-- **2 loại hành vi của Queue:**
-  - **Serial Queue (Tuần tự):** Tại một thời điểm chỉ thực thi **duy nhất 1 task**; task trước kết thúc thì task sau mới bắt đầu. Rất hay dùng để đồng bộ truy cập tài nguyên chung, ngăn ngừa Race Condition.
-  - **Concurrent Queue (Đồng thời):** Có thể khởi chạy **nhiều task gần như cùng lúc** trên nhiều thread khác nhau. Các task vẫn **bắt đầu** theo thứ tự FIFO, nhưng có thể **kết thúc** theo thứ tự bất kỳ.
+- **Queue Execution Types:**
+  - **Serial Queue:** Executes **one task at a time** in FIFO order (next starts only after previous finishes). Frequently used to synchronize shared resources and prevent race conditions.
+  - **Concurrent Queue:** Starts tasks in FIFO order but can run **multiple tasks simultaneously** on separate threads; tasks may finish in any order.
 
-- **3 loại DispatchQueue:**
-  1. **`DispatchQueue.main`:** Là một **Serial Queue** duy nhất gắn với Main Thread -> chuyên dùng để cập nhật UI.
-  2. **`DispatchQueue.global(qos:)`:** Các **Concurrent Queue** có sẵn của hệ thống chạy ở nền (background), phân chia theo 5 mức độ ưu tiên **QoS (Quality of Service)** từ cao xuống thấp:
-     - `.userInteractive`: Cao nhất — việc cần phản hồi ngay lập tức liên quan trực tiếp tới trải nghiệm UI mượt mà (animation, tính toán giao diện).
-     - `.userInitiated`: Việc do người dùng chủ động kích hoạt và cần kết quả sau vài giây (mở tài liệu, bấm nút tải dữ liệu hiển thị ngay).
-     - `.default`: Mức mặc định nằm giữa `.userInitiated` và `.utility` (thường không cần chỉ định tường minh).
-     - `.utility`: Tác vụ chạy hơi lâu, thường đi kèm thanh tiến trình (tải file, tính toán dữ liệu lớn, đồng bộ API).
-     - `.background`: Thấp nhất — tác vụ chạy ngầm người dùng không nhìn thấy (backup dữ liệu, dọn cache, prefetch).
-     - *(Ngoài ra còn `.unspecified` để tương thích các API legacy).*
-  3. **Custom Queue:** Queue tự tạo (`DispatchQueue(label: "com.app.myqueue", attributes: .concurrent)`). Mặc định nếu không truyền `attributes: .concurrent` thì là **Serial Queue**.
+- **3 DispatchQueue Categories:**
+  1. **`DispatchQueue.main`:** A system-provided **Serial Queue** bound to the Main Thread—used exclusively for UI updates.
+  2. **`DispatchQueue.global(qos:)`:** System-provided **Concurrent Queues** running in the background across 5 **Quality of Service (QoS)** priority levels (highest to lowest):
+     - `.userInteractive`: Highest priority—work directly impacting immediate UI responsiveness (animations, custom drawing).
+     - `.userInitiated`: Tasks triggered directly by the user needing results within seconds (opening a document, button-triggered fetch).
+     - `.default`: Falls between `.userInitiated` and `.utility` (default parameter; rarely specified explicitly).
+     - `.utility`: Longer-running work typically showing a progress indicator (file downloads, heavy computation).
+     - `.background`: Lowest priority—work invisible to the user (backups, syncing, prefetching).
+     - *(Plus `.unspecified` for legacy APIs opting out of QoS).*
+  3. **Custom Queue:** Developer-created queue via `DispatchQueue(label: "com.app.queue", attributes: .concurrent)`. Without `.concurrent`, a custom queue is **Serial** by default.
 
-- **Các công cụ điều phối nâng cao trong GCD:**
-  - **`DispatchGroup`:** Gom nhiều task bất đồng bộ (có thể ở nhiều queue khác nhau) và nhận thông báo khi **tất cả đã hoàn thành**.
-    - Dùng `group.enter()` trước khi bắt đầu mỗi task bất đồng bộ và `group.leave()` khi xong (**bắt buộc số lần `enter` phải bằng `leave`**, nếu lệch sẽ crash hoặc treo mãi).
-    - Dùng `group.notify(queue: .main) { ... }` để chạy code sau khi xong hết, hoặc `group.wait()` / `group.wait(timeout:)` để block luồng hiện tại chờ *(không gọi `wait()` trên Main Thread)*.
-  - **`DispatchWorkItem`:** Đóng gói một khối code thành đối tượng có thể chạy hoặc hủy bằng `workItem.cancel()` *(lưu ý: chỉ hủy tự động nếu task chưa bắt đầu chạy; nếu đang chạy phải tự kiểm tra `workItem.isCancelled` bên trong)*. Hỗ trợ `workItem.notify(queue:)`.
-  - **`DispatchBarrier` (`flags: .barrier`):** Khi gửi một task ghi dữ liệu kèm `.barrier` vào **Custom Concurrent Queue** (không dùng trên Global Queue), GCD sẽ đợi các task đọc trước đó chạy xong, thực thi task barrier **một mình** như serial, rồi mới cho các task đọc tiếp theo chạy song song tiếp -> Rất chuẩn cho bài toán **Multiple Readers - Single Writer**.
-  - **`DispatchSemaphore`:** Giới hạn tối đa $N$ thread được truy cập cùng lúc vào một tài nguyên. Khởi tạo `DispatchSemaphore(value: N)`, gọi `semaphore.wait()` (giảm bộ đếm đi 1, nếu $< 0$ thì đợi) và `semaphore.signal()` (tăng bộ đếm lên 1 khi xong).
+- **Synchronization Primitives in GCD:**
+  - **`DispatchGroup`:** Aggregates multiple async tasks (even across different queues) and notifies when all finish.
+    - Call `group.enter()` before each async task and `group.leave()` upon completion (**`enter` and `leave` counts must match strictly**, or the app crashes/hangs).
+    - Use `group.notify(queue: .main) { ... }` for non-blocking completion, or `group.wait()` / `group.wait(timeout:)` to block *(never call `wait()` on the Main Thread)*.
+  - **`DispatchWorkItem`:** Wraps a block of work into an object supporting `workItem.cancel()` *(cancels automatically before execution starts; once running, check `workItem.isCancelled` manually)* and `workItem.notify(queue:)`.
+  - **`DispatchBarrier` (`flags: .barrier`):** Submitted to a **Custom Concurrent Queue** (never a Global Queue), a barrier waits for prior reads to finish, executes **exclusively (serially)**, and then lets subsequent concurrent tasks resume—ideal for **Multiple Readers / Single Writer** thread safety.
+  - **`DispatchSemaphore`:** Caps concurrent access to a resource at $N$ threads. Initialize `DispatchSemaphore(value: N)`, call `semaphore.wait()` before entering, and `semaphore.signal()` when finished.
 
-- **Các vấn đề thường gặp trong Đa luồng & Cách khắc phục:**
+- **Common Concurrency Hazards & Remedies:**
 
-| Vấn đề | Định nghĩa | Cách khắc phục |
+| Hazard | Description | Remedy |
 | :--- | :--- | :--- |
-| **Race Condition & Critical Section** | Nhiều thread cùng truy cập vào đoạn mã/tài nguyên dùng chung (*Critical Section*), trong đó có ít nhất 1 thread **ghi dữ liệu**, dẫn đến sai lệch kết quả hoặc crash bộ nhớ. | Dùng **Mutual Exclusion** (khóa `NSLock`, `os_unfair_lock`), **Serial Queue**, **Dispatch Barrier**, hoặc **Actor** trong Swift Concurrency. |
-| **Deadlock (Tắc nghẽn)** | Hai hoặc nhiều thread/queue **đợi lẫn nhau** giải phóng tài nguyên/khóa mãi mãi -> app đứng hình hoặc crash. Ví dụ kinh điển: gọi `DispatchQueue.main.sync { ... }` ngay khi đang chạy trên Main Thread! | Không gọi `.sync` lên chính queue hiện tại (đặc biệt là `main.sync` từ main thread); thống nhất thứ tự khóa tài nguyên; dùng `.async` khi không cần chờ. |
-| **Priority Inversion** | Tác vụ có QoS thấp đang giữ một tài nguyên/lock khiến tác vụ có QoS cao phải ngồi chờ tác vụ thấp chạy xong trước. | Phân chia đúng mức QoS cho các tác vụ liên quan, tránh để queue ưu tiên cao `wait` trên tài nguyên bị giữ bởi queue ưu tiên thấp (hoặc dựa vào cơ chế nâng ưu tiên tự động của GCD/Lock). |
+| **Race Condition & Critical Section** | Two or more threads access shared mutable state (*Critical Section*) concurrently with at least one write, corrupting data or crashing. | Mutual exclusion (`NSLock`, `os_unfair_lock`), **Serial Queue**, **Dispatch Barrier**, or Swift **`actor`**. |
+| **Deadlock** | Two or more threads/queues wait indefinitely on each other to release resources/locks. Classic bug: calling `DispatchQueue.main.sync { ... }` from the Main Thread! | Never call `.sync` onto the same serial queue you are currently running on; maintain consistent lock ordering; prefer `.async`. |
+| **Priority Inversion** | A high-QoS task is blocked waiting for a resource/lock currently held by a low-QoS task, degrading app responsiveness. | Assign appropriate QoS levels and avoid blocking high-priority queues on low-priority work. |
 
 ## 6.3. Operation & OperationQueue
-- **Operation:** Là một lớp trừu tượng (xây dựng trên GCD) đóng gói một đơn vị công việc hướng đối tượng. Không dùng trực tiếp `Operation` mà dùng **`BlockOperation`** hoặc **subclass `Operation`** (override hàm `main()`).
-- **4 Trạng thái vòng đời của Operation (read-only):**
-  1. `isReady`: Đã sẵn sàng thực thi (tất cả dependencies đã xong).
-  2. `isExecuting`: Đang thực thi.
-  3. `isFinished`: Đã hoàn thành.
-  4. `isCancelled`: Đã bị gọi `cancel()`. *(Lưu ý: Gọi `cancel()` chỉ bật cờ `isCancelled = true`; khi tự viết subclass phải tự kiểm tra `if isCancelled { return }` bên trong `main()`, và một operation đã ở trạng thái `isFinished` hoặc `isCancelled` thì không thể chạy lại).*
+- **`Operation`:** An object-oriented abstraction built atop GCD. You never instantiate `Operation` directly; instead use **`BlockOperation`** or **subclass `Operation`** (overriding `main()`).
+- **4 Read-Only State Properties:**
+  1. `isReady`: Ready to run (all dependencies satisfied).
+  2. `isExecuting`: Currently running.
+  3. `isFinished`: Completed execution.
+  4. `isCancelled`: Cancellation requested via `cancel()`. *(Note: Calling `cancel()` only sets `isCancelled = true`; inside a subclass's `main()`, check `if isCancelled { return }`. Once `isFinished` or `isCancelled`, an operation cannot be restarted).*
 - **`OperationQueue`:**
-  - `maxConcurrentOperationCount`: Giới hạn số operation chạy đồng thời (`= 1` sẽ biến nó thành Serial Queue).
-  - `addOperation(_:)` / `addOperations(_:waitUntilFinished:)`: Thêm tác vụ vào hàng đợi (tự động xóa khỏi queue sau khi xong).
-  - `addDependency(_:)`: Thiết lập phụ thuộc giữa các operation (Operation B chỉ chạy sau khi Operation A hoàn thành) — điểm mạnh vượt trội so với GCD thuần.
-  - `isSuspended`: Tạm dừng việc bắt đầu các operation mới trong hàng đợi (`cancelAllOperations()` để hủy toàn bộ).
+  - `maxConcurrentOperationCount`: Limits concurrent operations (`1` makes it behave serially).
+  - `addOperation(_:)` / `addOperations(_:waitUntilFinished:)`: Enqueues operations (automatically removed upon completion).
+  - `addDependency(_:)`: Enforces execution order between operations (e.g., Operation B waits until Operation A finishes)—a major advantage over plain GCD.
+  - `isSuspended`: Pauses starting new queued operations (`cancelAllOperations()` cancels all pending/running ones).
 
-- **Khi nào chọn `GCD` vs `OperationQueue`?**
-  - Dùng **GCD** cho các tác vụ bất đồng bộ gọn nhẹ, đơn giản, hiệu năng cao (gọi network rồi đẩy về main thread update UI).
-  - Dùng **OperationQueue** khi cần quản lý sâu vòng đời task: thiết lập **dependency phức tạp giữa các task**, giới hạn `maxConcurrentOperationCount`, **hủy/tạm dừng** hàng loạt task đang xếp hàng, hoặc theo dõi trạng thái KVO (`isExecuting`, `isFinished`).
+- **When to choose `GCD` vs. `OperationQueue`?**
+  - Use **GCD** for lightweight, straightforward async tasks (network calls followed by UI updates on `.main`).
+  - Use **OperationQueue** when you need **complex task dependencies**, `maxConcurrentOperationCount` throttling, **bulk cancellation/suspension**, or KVO state monitoring.
 
-## 6.4. Swift Concurrency hiện đại (`async/await`, `Task`, `TaskGroup`, `Actor`)
-- **`async` / `await`:** Cho phép viết code bất đồng bộ tuần tự, dễ đọc như code đồng bộ, loại bỏ "callback hell" (lồng nhiều closure) và giảm lỗi quên gọi completion handler.
-- **`Task`:** Tạo ra một đơn vị công việc bất đồng bộ có thể chạy đồng thời, hỗ trợ hủy có cấu trúc (`task.cancel()`, `Task.isCancelled`) và truyền mức độ ưu tiên (`TaskPriority`).
-- **`TaskGroup` (`withTaskGroup` / `withThrowingTaskGroup`):** Cho phép tạo động một nhóm các `Task` con chạy song song, thu thập kết quả và đợi tất cả hoàn thành (Structured Concurrency — tự động hủy các task con nếu task cha bị hủy hoặc ném lỗi).
-- **`Actor`:** Là một **Reference Type** mới trong Swift giúp **cô lập trạng thái (state isolation)**. Mỗi `actor` bảo vệ các dữ liệu nội bộ của nó bằng cách chỉ cho phép **1 tác vụ truy cập vào state của nó tại một thời điểm** (bên ngoài muốn đọc/ghi property hoặc gọi method của actor phải dùng `await`). Nhờ vậy loại bỏ hoàn toàn **Data Race** ở mức trình biên dịch. (`@MainActor` là một global actor đặc biệt đảm bảo code luôn chạy trên Main Thread để cập nhật UI).
-
+## 6.4. Modern Swift Concurrency (`async/await`, `Task`, `TaskGroup`, `Actor`)
+- **`async` / `await`:** Enables writing asynchronous code sequentially and cleanly, eliminating callback pyramids and forgotten completion handlers.
+- **`Task`:** Creates an asynchronous unit of execution with built-in cooperative cancellation (`task.cancel()`, `Task.isCancelled`) and priority propagation (`TaskPriority`).
+- **`TaskGroup` (`withTaskGroup` / `withThrowingTaskGroup`):** Runs a dynamic number of child tasks concurrently, collects results, and enforces **Structured Concurrency** (automatically canceling child tasks if the parent cancels or throws).
+- **`Actor`:** A **Reference Type** providing **state isolation**—only one task may access an actor's mutable state at a time (external callers must `await` across isolation boundaries), eliminating **Data Races** at compile time. (`@MainActor` is a global actor guaranteeing execution on the Main Thread for UI updates).
 
 ---
 
-[← Mục lục My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Bài trước: 5. Lưu trữ dữ liệu (Persistence) & Hệ thống File iOS](./05-Persistence-va-File-System.md) | [Bài tiếp: 7. Kiến trúc phần mềm (Architecture) & Design Patterns ›](./07-Architecture-va-Design-Patterns.md)
+[← Back to My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Previous: 5. Data Persistence & iOS File System](./05-Persistence-and-File-System.md) | [Next: 7. Software Architecture & Design Patterns ›](./07-Architecture-and-Design-Patterns.md)

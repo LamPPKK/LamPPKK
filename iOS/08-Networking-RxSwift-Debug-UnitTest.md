@@ -1,75 +1,74 @@
-[← Mục lục My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Bài trước: 7. Kiến trúc phần mềm (Architecture) & Design Patterns](./07-Architecture-va-Design-Patterns.md) | [Bài tiếp: 9. Bài Tập Thực Hành & Live Coding Phỏng Vấn iOS ›](./09-Bai-Tap-Thuc-Hanh-va-Thuat-Toan.md)
+[← Back to My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Previous: 7. Software Architecture & Design Patterns](./07-Architecture-and-Design-Patterns.md) | [Next: 9. Practical Exercises, Live Coding & Algorithms ›](./09-Practical-Exercises-and-Algorithms.md)
 
 ---
 
-# 8. Networking, Bảo mật, Reactive (RxSwift), Debug, Unit Test & Công cụ
+# 8. Networking, Security, RxSwift, Debugging & Unit Testing
 
-## 8.1. Networking, Parse JSON (`Codable`) & Quản lý Token
-- **Tương tác API & Parse JSON trong Swift:**
-  - Dùng `URLSession.shared.dataTask(with:)` (hoặc `async/await` với `URLSession.shared.data(for:)`) để gửi HTTP Request (`GET`, `POST`, `PUT`, `DELETE`) và nhận `Data`, `URLResponse`, `Error`.
-  - **Encoding & Decoding (`Codable`):** `Codable` là typealias kết hợp giữa `Encodable` (chuyển Model Swift -> JSON/Data để gửi lên server) và `Decodable` (chuyển JSON/Data từ server -> Model Swift). Sử dụng `JSONDecoder` / `JSONEncoder` (tùy chỉnh tên key bằng `CodingKeys`).
-- **Xử lý và Lưu trữ Token an toàn:**
-  - **Trên ứng dụng iOS:**
-    - **Lưu trữ:** Lưu Access Token và Refresh Token vào **iOS Keychain** (được mã hóa phần cứng bởi hệ điều hành — tuyệt đối **không lưu Token vào `UserDefaults`** vì `UserDefaults` là file `.plist` không mã hóa, dễ bị đọc trộm).
-    - **Gửi lên Server:** Đính kèm Token vào HTTP Header dưới dạng `Authorization: Bearer <access_token>` qua HTTPS (TLS) kết hợp SSL Pinning nếu cần bảo mật cao.
-    - **Refresh Token Flow:** Khi API trả về mã lỗi `401 Unauthorized` (Access Token hết hạn), interceptor/network layer khóa các request đến sau (dùng `NSLock`/Actor), gọi API cấp lại Access Token mới bằng Refresh Token, lưu vào Keychain rồi retry lại các request bị 401; nếu Refresh Token cũng hết hạn thì đăng xuất người dùng.
-  - **Trên ứng dụng Web (nếu được hỏi mở rộng):** Tránh lưu vào `localStorage` / `sessionStorage` vì dễ bị tấn công **XSS**; ưu tiên lưu trong **Secure `HttpOnly` Cookie** (JavaScript không đọc được) hoặc gửi qua `Authorization` header kết hợp cơ chế chống CSRF.
+## 8.1. Networking, JSON Parsing (`Codable`) & Token Security
+- **API Requests & JSON Parsing in Swift:**
+  - Use `URLSession.shared.dataTask(with:)` (or `try await URLSession.shared.data(for:)`) for HTTP requests (`GET`, `POST`, `PUT`, `DELETE`).
+  - **Encoding & Decoding (`Codable`):** `Codable` combines `Encodable` (Swift model -> JSON/Data) and `Decodable` (JSON/Data -> Swift model), powered by `JSONEncoder` / `JSONDecoder` and `CodingKeys` for custom field mapping.
+- **Secure Token Handling:**
+  - **On iOS:**
+    - **Storage:** Store Access Tokens and Refresh Tokens in **iOS Keychain** (hardware-encrypted by iOS—**never store tokens in `UserDefaults`**, which is stored as an unencrypted `.plist`).
+    - **Transmission:** Send tokens in the HTTP header `Authorization: Bearer <access_token>` over HTTPS (TLS), optionally paired with SSL Pinning.
+    - **Refresh Token Flow:** When a request returns `401 Unauthorized`, synchronize incoming requests (via an `Actor` or lock), call the refresh-token endpoint once, save the new token in Keychain, and retry queued requests; if refreshing fails, log the user out.
+  - **On Web (if asked as a follow-up):** Avoid `localStorage` / `sessionStorage` due to **XSS** exposure; prefer **Secure `HttpOnly` Cookies** (inaccessible to JavaScript) paired with CSRF protection, or `Authorization` headers for API clients.
 
-## 8.2. Reactive Programming với RxSwift
-- **`Observable` là gì?** Là một chuỗi sự kiện bất đồng bộ (*Event Sequence*) có thể phát ra các giá trị theo thời gian; có tính **bất biến (immutable)** (mỗi operator tạo ra một `Observable` mới chứ không sửa `Observable` cũ).
-- **Khi nào `Observable` bắt đầu và kết thúc?**
-  - **Bắt đầu (Cold Observable):** Chỉ thực sự bắt đầu chạy và phát sự kiện **khi có ít nhất một `Observer` gọi `.subscribe(...)`** tới nó.
-  - **Kết thúc:** Khi nó phát ra sự kiện `.completed` hoặc `.error`, hoặc khi `Disposable` bị hủy (thêm vào `DisposeBag` và `DisposeBag` bị giải phóng).
-- **3 loại sự kiện (Events) của `Observable`:**
-  1. **`next(Element)`:** Phát ra một giá trị dữ liệu mới cho Observer.
-  2. **`error(Error)`:** Phát ra lỗi và **kết thúc ngay lập tức** chuỗi `Observable` (không phát thêm bất kỳ sự kiện nào nữa).
-  3. **`completed`:** Báo hiệu chuỗi đã hoàn thành bình thường và **kết thúc** (không phát thêm sự kiện nào nữa).
-- **Các nhóm Operators phổ biến trong RxSwift:**
-  - **Transformation:** `map` (biến đổi giá trị), `flatMap` / `flatMapLatest` (biến đổi phần tử thành một `Observable` khác rồi gộp lại — ví dụ gọi API nối tiếp hoặc search bar hủy request cũ bằng `flatMapLatest`).
-  - **Filtering:** `filter` (lọc theo điều kiện), `take(n)` (chỉ lấy `n` phần tử đầu), `debounce` / `throttle` (chống bấm/nhập liên tục).
-  - **Combining:** `merge` (gộp các stream cùng kiểu theo thời gian), `zip` (ghép đôi từng cặp phần tử tương ứng giữa các stream), `combineLatest` (phát mỗi khi một trong các stream có giá trị mới nhất).
-  - **Error Handling:** `catch` / `catchError` (bắt lỗi trả về giá trị thay thế), `retry` (thử lại khi lỗi), `timeout` (báo lỗi nếu quá thời gian chờ).
+## 8.2. Reactive Programming with RxSwift
+- **What is an `Observable`?** An asynchronous **event sequence** emitting values over time. Observables are **immutable**—each operator returns a new `Observable` without mutating the source.
+- **When does an `Observable` start and stop?**
+  - **Starts (Cold Observable):** Begins executing and emitting events only when at least one `Observer` calls **`.subscribe(...)`**.
+  - **Ends:** When it emits **`.completed`** or **`.error`**, or when its `Disposable` is disposed (typically when its `DisposeBag` is deallocated).
+- **3 Event Types Emitted by an `Observable`:**
+  1. **`next(Element)`:** Delivers a new value to subscribers.
+  2. **`error(Error)`:** Emits an error and **immediately terminates** the sequence.
+  3. **`completed`:** Signals successful completion and **terminates** the sequence (no further events).
+- **Common RxSwift Operator Categories:**
+  - **Transformation:** `map` (transform each element), `flatMap` / `flatMapLatest` (project each element into an `Observable` and flatten—`flatMapLatest` cancels prior inner observables, ideal for search-as-you-type).
+  - **Filtering:** `filter` (predicate filtering), `take(n)` (first `n` items), `debounce` / `throttle` (rate-limiting input/taps).
+  - **Combining:** `merge` (interleave streams of the same type), `zip` (pair elements 1-to-1 across streams), `combineLatest` (emit whenever any stream updates once all have emitted).
+  - **Error Handling:** `catch` / `catchError` (recover with fallback observable), `retry` (resubscribe on error), `timeout` (error if no emission within time window).
 
 ## 8.3. Push Notifications, Maps & Git
-- **Phân biệt Local Notification vs Remote Push Notification:**
-  - **Local Notification:** Do chính ứng dụng **tự lên lịch và kích hoạt cục bộ** trên thiết bị thông qua `UNUserNotificationCenter` (ví dụ: báo thức, nhắc lịch uống nước, đếm ngược) — hoạt động không cần internet hay server.
-  - **Remote Push Notification:** Được gửi từ **Backend Server -> APNs (Apple Push Notification service) -> Thiết bị người dùng** dựa trên `deviceToken` (ví dụ: tin nhắn mới, trạng thái đơn hàng, khuyến mãi) — cần kết nối mạng và cấu hình chứng chỉ/key APNs.
-- **Các loại Map dùng trong iOS:**
-  - **`MapKit` (Apple):** Miễn phí, tích hợp sâu vào hệ sinh thái iOS/Swift, tối ưu pin và hiệu năng.
-  - **`Google Maps SDK` (`GMSMapView`):** Dữ liệu địa điểm (POI) và bản đồ chi tiết tại Việt Nam/toàn cầu rất mạnh, tính phí theo quota API.
-  - **`Mapbox`:** Cho phép tùy biến sâu giao diện bản đồ (custom style), dẫn đường turn-by-turn.
-- **Git (`git merge` vs `git rebase`):**
-  - **`git merge`:** Giữ nguyên toàn bộ lịch sử commit của cả 2 nhánh và tạo thêm một **merge commit** mới để hợp nhất. An toàn khi làm việc trên nhánh chung (shared branch) nhưng cây lịch sử có nhiều nhánh rẽ.
-  - **`git rebase`:** Di chuyển/viết lại toàn bộ commit của nhánh hiện tại nối tiếp lên đỉnh mới nhất của nhánh đích, tạo ra **lịch sử thẳng hàng (linear history)** sạch đẹp. *Lưu ý: Tuyệt đối không `rebase` trên các nhánh public/chung (như `main`/`develop`) đã có người khác kéo về vì nó làm thay đổi hash commit.*
+- **Local Notification vs. Remote Push Notification:**
+  - **Local Notification:** Scheduled and triggered locally on-device by the app via `UNUserNotificationCenter` (e.g., alarms, reminders)—requires no internet or backend server.
+  - **Remote Push Notification:** Sent from your **Backend Server -> APNs (Apple Push Notification service) -> Device** using a `deviceToken` (e.g., chat messages, order alerts)—requires internet and APNs certificates/keys.
+- **Map SDKs on iOS:**
+  - **`MapKit` (Apple):** Native, free, deeply integrated with iOS/Swift, power-efficient.
+  - **`Google Maps SDK` (`GMSMapView`):** Rich POI database and detailed street coverage globally, usage-based API billing.
+  - **`Mapbox`:** Extensive visual map style customization and turn-by-turn navigation SDKs.
+- **Git (`git merge` vs. `git rebase`):**
+  - **`git merge`:** Preserves full branching history of both branches and creates a new **merge commit**. Safe for shared branches (`main`, `develop`), though the commit graph becomes non-linear.
+  - **`git rebase`:** Replays your feature branch commits onto the tip of the target branch, creating a clean **linear history**. *Rule: Never rebase commits already pushed to shared/public branches because it rewrites commit hashes.*
 
-## 8.4. Debugging & Unit Testing trên Xcode
+## 8.4. Debugging & Unit Testing in Xcode
 
-- **Các kỹ thuật Debug trong iOS:**
-  - **Debug Log:** `print()`, `OSLog` / `Logger`.
-  - **Breakpoints:** Regular Breakpoint (dừng tại dòng code), **Conditional Breakpoint** (chỉ dừng khi thỏa điều kiện), **Exception Breakpoint** (tự động dừng ngay tại dòng gây crash thay vì dừng ở `AppDelegate`), Symbolic Breakpoint, Action Breakpoint (in log mà không dừng app).
-  - **Lệnh LLDB thông dụng trong Console:**
-    - `po <object>`: Print Object (gọi `debugDescription` in thông tin chi tiết đối tượng).
-    - `p <variable>`: Print giá trị/kiểu dữ liệu thô (dùng tốt cho struct/primitive).
-    - `expr <variable> = <value>`: Thay đổi giá trị biến ngay lúc đang chạy debug.
-    - `bt [number]`: In Backtrace (stacktrace các lời gọi hàm).
-    - `thread return`: Thoát sớm khỏi hàm hiện tại trong lúc debug.
-  - **Debug UI:** **Debug View Hierarchy** (xem phân tầng 3D các view để phát hiện view bị che, sai kích thước, thiếu constraint).
-  - **Debug Memory:** **Debug Memory Graph** & Instruments (**Leaks**, **Allocations**) để phát hiện Retain Cycle và Memory Leak.
-  - **Debug Network & Database:** **Charles Proxy** / **Proxyman** / **Wireshark** (bắt gói tin HTTP/HTTPS); CoreData Editor / DB Browser for SQLite.
+- **Debugging Tools & Techniques:**
+  - **Logging:** `print()`, `OSLog` / `Logger`.
+  - **Breakpoints:** Regular breakpoints, **Conditional Breakpoints** (break only when condition is true), **Exception Breakpoints** (pause directly at the throwing line instead of `AppDelegate`), Symbolic & Action Breakpoints (log without pausing).
+  - **Essential LLDB Commands:**
+    - `po <object>`: Print Object (`debugDescription`).
+    - `p <variable>`: Print raw type/value (great for structs and primitives).
+    - `expr <variable> = <value>`: Mutate state live at a breakpoint.
+    - `bt [number]`: Print stack backtrace.
+    - `thread return`: Return early from the current stack frame during debugging.
+  - **UI Debugging:** **Debug View Hierarchy** (3D layer inspection for clipped, hidden, or mis-sized views).
+  - **Memory Debugging:** **Debug Memory Graph** and Instruments (**Leaks**, **Allocations**) to catch retain cycles.
+  - **Network & Database Inspection:** **Charles Proxy** / **Proxyman** / **Wireshark** (HTTP traffic); CoreData Editor / DB Browser for SQLite.
 
 - **Unit Testing (`XCTest` / `Swift Testing`):**
-  - **3 loại Test chính:**
-    1. **Functional / Unit Test:** Kiểm tra tính đúng đắn của một đơn vị code nhỏ nhất (hàm, logic ViewModel, Model).
-    2. **Performance Test (`measure { ... }`):** Đo thời gian thực thi tác vụ để phát hiện suy giảm hiệu năng.
-    3. **UI Test (`XCUITest`):** Giả lập thao tác người dùng thực tế (tap, scroll, nhập text) để kiểm tra luồng giao diện.
-  - **Vòng đời một Test Case:** `setUp()` (chuẩn bị dữ liệu/trạng thái trước mỗi test) -> `test...()` (chạy hàm kiểm thử với các `XCTAssert...`) -> `tearDown()` (dọn dẹp tài nguyên sau mỗi test).
-  - **Tiêu chí một Unit Test tốt (FIRST):** Nhanh (Fast), Độc lập (Independent), Lặp lại được (Repeatable), Tự kiểm chứng kết quả (Self-Validating - có thể pass hoặc fail rõ ràng), Viết kịp thời (Timely) và giữ code test sạch sẽ.
-  - **3 cách chạy Test trong Xcode:**
-    1. Menu **Product -> Test** (phím tắt `Cmd + U`) để chạy toàn bộ test suite.
-    2. Nhấn nút Play ở **Test Navigator** (`Cmd + 6`).
-    3. Nhấn trực tiếp vào biểu tượng hình thoi (diamond) bên cạnh tên class test hoặc từng hàm `test...()`.
-
+  - **3 Test Types:**
+    1. **Functional / Unit Tests:** Verify correctness of isolated units (functions, ViewModels, Models).
+    2. **Performance Tests (`measure { ... }`):** Benchmark execution time to catch regressions.
+    3. **UI Tests (`XCUITest`):** Simulate real user taps, typing, and scrolling end-to-end.
+  - **Test Lifecycle:** `setUp()` (prepare clean state) -> `test...()` (run assertions like `XCTAssertEqual`) -> `tearDown()` (clean up resources).
+  - **Qualities of Useful Tests (FIRST):** Fast, Independent, Repeatable, Self-Validating (clearly capable of failing and passing), Timely, and cleanly refactored.
+  - **3 Ways to Run Tests in Xcode:**
+    1. **Product -> Test** (`Cmd + U`) to run the entire test suite.
+    2. Play button in the **Test Navigator** (`Cmd + 6`).
+    3. Click the gutter diamond icon next to an individual test class or `test...()` method.
 
 ---
 
-[← Mục lục My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Bài trước: 7. Kiến trúc phần mềm (Architecture) & Design Patterns](./07-Architecture-va-Design-Patterns.md) | [Bài tiếp: 9. Bài Tập Thực Hành & Live Coding Phỏng Vấn iOS ›](./09-Bai-Tap-Thuc-Hanh-va-Thuat-Toan.md)
+[← Back to My iOS Handbook](./My%20iOS%20Handbook.md) | [‹ Previous: 7. Software Architecture & Design Patterns](./07-Architecture-and-Design-Patterns.md) | [Next: 9. Practical Exercises, Live Coding & Algorithms ›](./09-Practical-Exercises-and-Algorithms.md)
