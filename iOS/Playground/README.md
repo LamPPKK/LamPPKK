@@ -1,3 +1,7 @@
+[← Back to My iOS Handbook](../My%20iOS%20Handbook.md)
+
+---
+
 # Swift Playgrounds — Learning Curriculum & Topic Examples
 
 This workspace is organized into two standalone sets of Swift playgrounds grouped by topic so each playground can be opened in **Xcode** or executed independently via **Terminal (`swift Contents.swift`)**.

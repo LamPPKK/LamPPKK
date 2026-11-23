@@ -68,18 +68,12 @@
   - Exercise 10: Operator Precedence & Short-Circuit Boolean Logic
   - Exercise 11: Classic Algorithms in iOS Interviews (Sorting, Binary Search, Boyer-Moore Majority Vote, Substring Search, Shortest Path)
 
+### Part III: Interactive Swift Playgrounds (Runnable Code)
+
+- **[Swift Playgrounds Index](./Playground/README.md)** — Full index & run instructions (`Xcode` / `swift Contents.swift`)
+- **[01_Curriculum/](./Playground/01_Curriculum)** — 21 Guided Lessons & Capstone Challenges
+- **[02_Examples/](./Playground/02_Examples)** — 22 Single-Topic Reference Playgrounds & Exercises
+
 ---
 
-## Directory Structure
-
-- [My iOS Handbook.md](./My%20iOS%20Handbook.md) — Central Table of Contents.
-- [01-OOP-and-SOLID.md](./01-OOP-and-SOLID.md) — Object-Oriented Programming & SOLID Principles.
-- [02-Swift-Core.md](./02-Swift-Core.md) — Swift Language Core Concepts.
-- [03-ARC-and-Memory-Management.md](./03-ARC-and-Memory-Management.md) — ARC, `weak`, `unowned`, and Retain Cycles.
-- [04-iOS-SDK-and-UIKit.md](./04-iOS-SDK-and-UIKit.md) — Lifecycles, UIKit, Auto Layout, TableView/CollectionView & Animation.
-- [05-Persistence-and-File-System.md](./05-Persistence-and-File-System.md) — Sandbox, Core Data, SQLite & Realm.
-- [06-Concurrency-GCD-Operation-AsyncAwait.md](./06-Concurrency-GCD-Operation-AsyncAwait.md) — GCD, `OperationQueue` & Swift Concurrency.
-- [07-Architecture-and-Design-Patterns.md](./07-Architecture-and-Design-Patterns.md) — Design Patterns & iOS App Architectures.
-- [08-Networking-RxSwift-Debug-UnitTest.md](./08-Networking-RxSwift-Debug-UnitTest.md) — Networking, Security, RxSwift, Debugging & Testing.
-- [09-Practical-Exercises-and-Algorithms.md](./09-Practical-Exercises-and-Algorithms.md) — Coding Challenges, Debugging Puzzles & Classic Algorithms.
-- [images/](./images/) — Diagrams and screenshots extracted from original interview sheets.
+> Diagram assets referenced across chapters are stored in [`./images/`](./images/).

@@ -61,30 +61,30 @@ Building open-source software across **Browser Engines**, **Apple & Mobile Platf
 
 ## 📘 Engineering Notes — [My iOS Handbook](./iOS/My%20iOS%20Handbook.md)
 
-A modular iOS & Swift engineering interview handbook maintained directly in this repository, covering architecture, concurrency, memory management, UIKit internals, and hands-on coding exercises:
+A structured iOS & Swift knowledge base maintained directly in this repository — pairing **modular Markdown reference guides** with **runnable Swift 6 playgrounds**:
 
-| # | Chapter | Key Topics |
+### 📖 Handbook Chapters (Interview & Architecture Reference)
+
+| # | Chapter | Focus Areas |
 | :-: | :--- | :--- |
-| **01** | **[OOP & SOLID Principles](./iOS/01-OOP-and-SOLID.md)** | OOP pillars, single inheritance + protocols in Swift, Overriding vs. Overloading, SOLID |
+| **01** | **[OOP & SOLID Principles](./iOS/01-OOP-and-SOLID.md)** | OOP pillars, protocol-based composition, Overriding vs. Overloading, SOLID |
 | **02** | **[Swift Core Concepts](./iOS/02-Swift-Core.md)** | Optionals, Struct vs. Class, 2-Phase Init, Property Wrappers, Closures, Protocols, Generics, Access Control |
-| **03** | **[ARC & Memory Management](./iOS/03-ARC-and-Memory-Management.md)** | ARC vs. MRC, `strong` / `weak` / `unowned`, Retain Cycles, `[weak self]` & `guard let self = self` |
-| **04** | **[iOS SDK & UIKit](./iOS/04-iOS-SDK-and-UIKit.md)** | App & SceneDelegate Lifecycles, ViewController Lifecycle, Passing Data, Frame vs. Bounds, Auto Layout, Cell Reuse, Animation |
-| **05** | **[Persistence & File System](./iOS/05-Persistence-and-File-System.md)** | iOS Sandbox (`Documents`, `Library`, `tmp`), CRUD, Core Data Stack, SQLite vs. Core Data, Realm |
-| **06** | **[Concurrency & Multithreading](./iOS/06-Concurrency-GCD-Operation-AsyncAwait.md)** | GCD (`Serial`/`Concurrent`, QoS, Barrier, Semaphore, Deadlocks), `OperationQueue`, `async/await`, `TaskGroup`, `Actor` |
-| **07** | **[Architecture & Design Patterns](./iOS/07-Architecture-and-Design-Patterns.md)** | Singleton, Delegation, Observer, MVC, MVP, MVVM, VIPER & Clean Swift (VIP) |
-| **08** | **[Networking, RxSwift & Testing](./iOS/08-Networking-RxSwift-Debug-UnitTest.md)** | `URLSession` & `Codable`, Keychain Token Security, RxSwift, Push Notifications, Git, LLDB & `XCTest` |
-| **09** | **[Practical Exercises & Algorithms](./iOS/09-Practical-Exercises-and-Algorithms.md)** | 11 Live Coding challenges, Retain Cycle debugging, CoW & Higher-Order puzzles, Sorting, Binary Search, Boyer-Moore, Dijkstra |
+| **03** | **[ARC & Memory Management](./iOS/03-ARC-and-Memory-Management.md)** | ARC vs. MRC, `strong` / `weak` / `unowned`, Retain Cycles, `[weak self]` |
+| **04** | **[iOS SDK & UIKit](./iOS/04-iOS-SDK-and-UIKit.md)** | App/Scene & ViewController Lifecycles, Data Passing, Frame vs. Bounds, Auto Layout, Cell Reuse, Animation |
+| **05** | **[Persistence & File System](./iOS/05-Persistence-and-File-System.md)** | Sandbox (`Documents`, `Library`, `tmp`), Core Data Stack, SQLite, Realm |
+| **06** | **[Concurrency & Multithreading](./iOS/06-Concurrency-GCD-Operation-AsyncAwait.md)** | GCD, `OperationQueue`, `async/await`, `TaskGroup`, `Actor` |
+| **07** | **[Architecture & Design Patterns](./iOS/07-Architecture-and-Design-Patterns.md)** | Singleton, Delegation, Observer, MVC, MVP, MVVM, VIPER & Clean Swift |
+| **08** | **[Networking, RxSwift & Testing](./iOS/08-Networking-RxSwift-Debug-UnitTest.md)** | `URLSession` & `Codable`, Keychain, RxSwift, Push Notifications, Git, LLDB & `XCTest` |
+| **09** | **[Practical Exercises & Algorithms](./iOS/09-Practical-Exercises-and-Algorithms.md)** | 11 Live Coding challenges, Retain Cycle & CoW puzzles, Sorting, Binary Search, Boyer-Moore, Dijkstra |
 
----
+### 🧪 Interactive Companion — [Swift Playgrounds](./iOS/Playground/README.md)
 
-## 🍎 Swift Playgrounds — [Curriculum & Topic Examples](./iOS/Playground/README.md)
+43 standalone Swift 6 `.playground` packages (runnable in Xcode or via `swift Contents.swift`) organized into two complementary tracks:
 
-43 standalone, English Swift 6 playgrounds organized into a structured learning curriculum and topic-focused practice examples (runnable in Xcode or directly via `swift Contents.swift`):
-
-| Collection | Directory | Contents |
+| Track | Path | Scope |
 | :--- | :--- | :--- |
-| **Modern Swift Curriculum (21 Lessons)** | **[`iOS/Playground/01_Curriculum`](./iOS/Playground/01_Curriculum)** | Fundamentals (`01–08`), OOP & Types (`09–15`), Advanced Swift (`16–20`: Error Handling, Generics, ARC, Access Control, Concurrency), and Capstone Projects (`21`) |
-| **Topic Examples & Exercises (22 Playgrounds)** | **[`iOS/Playground/02_Examples`](./iOS/Playground/02_Examples)** | Single-topic playgrounds covering Fundamentals, OOP & Protocols, Advanced Swift (Opaque Types, async/await), plus algorithm & parser exercises |
+| **Guided Curriculum** | **[`01_Curriculum/`](./iOS/Playground/01_Curriculum)** | 21 step-by-step lessons with inline exercises and 3 capstone challenges |
+| **Topic Reference & Practice** | **[`02_Examples/`](./iOS/Playground/02_Examples)** | 22 focused single-topic playgrounds (syntax, patterns, algorithms, and SMS parsing) |
 
 ---
 
