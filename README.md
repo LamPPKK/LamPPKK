@@ -77,6 +77,17 @@ A modular iOS & Swift engineering interview handbook maintained directly in this
 
 ---
 
+## 🍎 Swift Playgrounds — [Curriculum & Topic Examples](./iOS/Playground/README.md)
+
+43 standalone, English Swift 6 playgrounds organized into a structured learning curriculum and topic-focused practice examples (runnable in Xcode or directly via `swift Contents.swift`):
+
+| Collection | Directory | Contents |
+| :--- | :--- | :--- |
+| **Modern Swift Curriculum (21 Lessons)** | **[`iOS/Playground/01_Curriculum`](./iOS/Playground/01_Curriculum)** | Fundamentals (`01–08`), OOP & Types (`09–15`), Advanced Swift (`16–20`: Error Handling, Generics, ARC, Access Control, Concurrency), and Capstone Projects (`21`) |
+| **Topic Examples & Exercises (22 Playgrounds)** | **[`iOS/Playground/02_Examples`](./iOS/Playground/02_Examples)** | Single-topic playgrounds covering Fundamentals, OOP & Protocols, Advanced Swift (Opaque Types, async/await), plus algorithm & parser exercises |
+
+---
+
 <!--
 **LamPPKK/LamPPKK** is a special repository because its `README.md` appears on the GitHub profile.
 -->
